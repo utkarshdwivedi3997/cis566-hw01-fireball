@@ -94,6 +94,9 @@ function main() {
   gl.enable(gl.BLEND);
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
+  // gl.enable(gl.CULL_FACE);
+  // gl.cullFace(gl.NONE);
+
   const {lambert, customShader, fireballShader} = setupShaders(gl);
 
   // This function will be called every frame
