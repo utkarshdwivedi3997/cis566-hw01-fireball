@@ -80,10 +80,11 @@ void main()
                                                             // perpendicular to the surface after the surface is transformed by
                                                             // the model matrix.
 
+    fs_Nor *= -1.0;     // flip normals
+
     fs_Pos = vs_Pos;
     fs_Pos += fs_Nor * perlinNoise3D(vec3(fs_Pos) * 2.0 + u_Time * 0.01) * 0.1;
 
-    fs_Nor *= -1.0;     // flip normals
     vec4 modelposition = u_Model * fs_Pos;   // Temporarily store the transformed vertex positions for use below
 
     fs_LightVec = fs_Pos - lightPos;

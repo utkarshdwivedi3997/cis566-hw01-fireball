@@ -64,6 +64,6 @@ void main()
     float noise4 = perlinNoise3D(vec3(fs_Pos * sin(u_Time* 0.005)) * 5.0);
     vec4 diffuseColor = vec4(u_Color.r * noise, u_Color.g * noise2, u_Color.b * noise3, 0.8);
 
-    out_Col = vec4(1.0,0.5,0.2,0.5);
+    out_Col = diffuseColor;
     // out_Col = vec4(vec3(1.0), step((fract(u_Time * 0.01)) * 0.5,perlinNoise3D(vec3(fs_Pos))));
 }

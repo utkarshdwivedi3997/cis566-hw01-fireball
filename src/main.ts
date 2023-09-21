@@ -43,7 +43,7 @@ function loadScene() {
   fireballBase = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.baseTesselations);
   fireballBase.create();
 
-  outerRim = new Icosphere(vec3.fromValues(0,0,0), 1.1, controls.outerRimTesselations);
+  outerRim = new Icosphere(vec3.fromValues(0,0,0), 0.9, controls.outerRimTesselations);
   outerRim.create();
   
   square = new Square(vec3.fromValues(0, 0, 0));
@@ -130,6 +130,7 @@ function main() {
   gl.enable(gl.BLEND);
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
+  // Enable backface culling: good for optimization but also needed for inverted-hull rim outlining
   gl.enable(gl.CULL_FACE);
   gl.cullFace(gl.BACK);
 
@@ -145,7 +146,11 @@ function main() {
     handleInput();
 
     let color = vec4.fromValues(controls.Color[0] / 255.0, controls.Color[1] / 255.0, controls.Color[2] / 255.0, controls.Color[3])
-    fireballShader.setTime(time++);
+    
+    rimShader.setTime(time);
+    fireballShader.setTime(time);
+    time++;
+
     renderer.render(camera,
       [ fireballBase, outerRim ],
       [ fireballShader, rimShader ], 
