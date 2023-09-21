@@ -12,23 +12,40 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-  tesselations: 5,
+  baseTesselations: 5,
+  outerRimTesselations: 3,
   'Load Scene': loadScene, // A function pointer, essentially
   Color: [255,255,255,1]  // default Red color
 };
 
-let icosphere: Icosphere;
+function setupGui()
+{
+  const gui = new DAT.GUI();
+  gui.add(controls, 'baseTesselations', 0, 8).step(1);
+  gui.add(controls, 'outerRimTesselations', 0, 5).step(1);
+  gui.add(controls, 'Load Scene');
+  gui.addColor(controls, 'Color');
+}
+
+let fireballBase: Icosphere;
+let outerRim: Icosphere;
+
 let square: Square;
 let cube: Cube;
-let prevTesselations: number = 5;
+let prevBaseTesselations: number = 5;
+let prevOuterRimTesselations: number = 3;
 let time = 0;
 
 /* ============= SHADERS ============= */
 
 
 function loadScene() {
-  icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
-  icosphere.create();
+  fireballBase = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.baseTesselations);
+  fireballBase.create();
+
+  outerRim = new Icosphere(vec3.fromValues(0,0,0), 1.1, controls.outerRimTesselations);
+  outerRim.create();
+  
   square = new Square(vec3.fromValues(0, 0, 0));
   square.create();
   cube = new Cube(vec3.fromValues(0, 0, 0));
@@ -51,9 +68,31 @@ function setupShaders(gl: WebGL2RenderingContext)
 
     fireballShader: new ShaderProgram([
       new Shader(gl.VERTEX_SHADER, require('./shaders/fireball-vert.glsl')),
-      new Shader(gl.FRAGMENT_SHADER, require('./shaders/fireball-frag.glsl')),
+      new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.glsl')),
+    ]),
+
+    rimShader: new ShaderProgram([
+      new Shader(gl.VERTEX_SHADER, require('./shaders/rim-vert.glsl')),
+      new Shader(gl.FRAGMENT_SHADER, require('./shaders/rim-frag.glsl')),
     ]),
   };
+}
+
+function handleInput()
+{
+  if(controls.baseTesselations != prevBaseTesselations)
+  {
+    prevBaseTesselations = controls.baseTesselations;
+    fireballBase = new Icosphere(vec3.fromValues(0, 0, 0), 1, prevBaseTesselations);
+    fireballBase.create();
+  }
+
+  if (controls.outerRimTesselations != prevOuterRimTesselations)
+  {
+    prevOuterRimTesselations = controls.outerRimTesselations;
+    outerRim = new Icosphere(vec3.fromValues(0,0,0), 1.1, prevOuterRimTesselations);
+    outerRim.create();
+  }
 }
 
 function main() {
@@ -66,10 +105,7 @@ function main() {
   document.body.appendChild(stats.domElement);
 
   // Add controls to the gui
-  const gui = new DAT.GUI();
-  gui.add(controls, 'tesselations', 0, 8).step(1);
-  gui.add(controls, 'Load Scene');
-  gui.addColor(controls, 'Color');
+  setupGui();
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -94,10 +130,10 @@ function main() {
   gl.enable(gl.BLEND);
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-  // gl.enable(gl.CULL_FACE);
-  // gl.cullFace(gl.NONE);
+  gl.enable(gl.CULL_FACE);
+  gl.cullFace(gl.BACK);
 
-  const {lambert, customShader, fireballShader} = setupShaders(gl);
+  const {lambert, customShader, fireballShader, rimShader} = setupShaders(gl);
 
   // This function will be called every frame
   function tick() {
@@ -105,20 +141,16 @@ function main() {
     stats.begin();
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
-    if(controls.tesselations != prevTesselations)
-    {
-      prevTesselations = controls.tesselations;
-      icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, prevTesselations);
-      icosphere.create();
-    }
+
+    handleInput();
 
     let color = vec4.fromValues(controls.Color[0] / 255.0, controls.Color[1] / 255.0, controls.Color[2] / 255.0, controls.Color[3])
     fireballShader.setTime(time++);
-    renderer.render(camera, fireballShader, [
-      icosphere,
-      // cube,
-      // square,
-    ], color = color);
+    renderer.render(camera,
+      [ fireballBase, outerRim ],
+      [ fireballShader, rimShader ], 
+      color = color);
+
     stats.end();
     
     // Tell the browser to call `tick` again whenever it renders a new frame
