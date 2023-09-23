@@ -143,8 +143,10 @@ void main()
                                                             // the model matrix.
 
     fs_Pos = vs_Pos;
+    // Perlin: large scale noise displacement with slow movement
     fs_Pos += fs_Nor * perlinNoise3D(vec3(fs_Pos) * 2.0 + u_Time * 0.003) * 0.1;
-    fs_Pos += fs_Nor * fbm(vec3(fs_Pos), 1.0, 7.0) * 0.1;
+    // FBM: smaller, finer displacement
+    fs_Pos += fs_Nor * fbm(vec3(fs_Pos), 1.0, 5.0) * 0.1;
 
     vec4 modelposition = u_Model * fs_Pos;   // Temporarily store the transformed vertex positions for use below
 

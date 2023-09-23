@@ -57,14 +57,19 @@ float perlinNoise3D(vec3 p)
 void main()
 {
     // Material base color (before shading)
-    // float noise = 1.0 - abs(perlinNoise3D(vec3(fs_Pos + sin(u_Time * 0.005)) * 2.0));
-    // float noise2 = 1.0 - abs(perlinNoise3D(vec3(fs_Pos + cos(u_Time * 0.005)) * 3.0));
-    // float noise3 = 1.0 - abs(perlinNoise3D(vec3(fs_Pos + sin(u_Time * 0.001)) * 1.0));
+    float noise = 1.0 - abs(perlinNoise3D(vec3(fs_Pos) * 2.0));
+    float noise2 = 1.0 - abs(perlinNoise3D(vec3(fs_Pos) * 3.0));
+    float noise3 = 1.0 - abs(perlinNoise3D(vec3(fs_Pos) * 1.0));
 
-    // float noise4 = perlinNoise3D(vec3(fs_Pos * sin(u_Time* 0.005)) * 5.0);
-    // vec4 diffuseColor = vec4(u_Color.r * noise, u_Color.g * noise2, u_Color.b * noise3, 1.0);
+    float noise4 = perlinNoise3D(vec3(fs_Pos) * 5.0);
+    vec4 diffuseColor = vec4(u_Color.r * noise, u_Color.g * noise2, u_Color.b * noise3, 1.0);
 
-    float ridge = step(1.1, distance(vec3(fs_Pos), vec3(0.0)));
-    out_Col = ridge * fs_Col;
+    float lava = step(1.1, distance(vec3(fs_Pos), vec3(0.0)));
+    float rock = 1.0 - lava;    // whatever is not rock is lava
+
+
+    out_Col = lava * fs_Col;
+
+    out_Col += (1.0 - lava) * diffuseColor; 
     // out_Col = vec4(vec3(1.0), step((fract(u_Time * 0.01)) * 0.5,perlinNoise3D(vec3(fs_Pos))));
 }
