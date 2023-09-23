@@ -148,7 +148,6 @@ void main()
     // Perlin: large scale noise displacement with slow movement
     fs_perlin = perlinNoise3D(vec3(fs_Pos) * 5.0 + u_Time * 0.003) * 0.1;
 
-    // fs_Pos += fs_Nor * perlinNoise3D(vec3(fs_Pos) * 2.0 + u_Time * 0.003) * 0.1;
     // FBM: static "rocks" area. This should never move
     fs_fbm = fbm(vec3(fs_Pos), 1.0, 4.0);
     fs_Pos += fs_Nor * fs_fbm * 0.2;

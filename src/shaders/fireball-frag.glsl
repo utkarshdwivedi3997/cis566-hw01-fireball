@@ -125,23 +125,24 @@ void main()
 {
     // Material base color (before shading)
     vec3 yellow = vec3(1.0,1.0,0.0);
-    vec3 red = vec3(1.0,0.0,0.0);
-    vec3 black = vec3(0.0);
+    vec3 red = vec3(0.8,0.0,0.0);
+    vec3 grey1 = vec3(0.212,0.137,0.149);
+    vec3 grey2 = vec3(0.384,0.384,0.4);
 
-    float noise2 = abs(perlinNoise3D(vec3(fs_Pos) * 5.0));
-    float noise3 = perlinNoise3D(vec3(fs_Pos * 5.0) * 1.0);
+    float rockPattern = perlinNoise3D(vec3(fs_Pos * 50.0) * 5.0);
+    float rockStriations = 1.0 - abs(perlinNoise3D(vec3(fs_Pos + u_Time * 0.0001) * 2.0));
+    float rockNoise = fbm(vec3(fs_Pos + fs_fbm * rockStriations) * 3.0, 2.0, 1.0) * 0.3;
+
+    vec3 rockBase = mix(grey1, grey2, rockPattern);
+    vec4 rockCol = vec4(mix(red, rockBase, pow(rockNoise, 3.0)), 1.0);
+
     float lavaNoise = fbm(vec3(fs_Pos * 4.0), 1.0, 2.0) * 0.5;
     lavaNoise = smoothstep(0.2, 0.7, (perlinNoise3D(vec3(fs_Pos + lavaNoise + u_Time * 0.001) * 3.0) + 1.0) * 0.5);
-    float fbm = 1.0 - abs(fbm(vec3(fs_Pos + noise2) * 3.0, 2.0, 1.0) * 0.3);
+    vec4 lavaCol = vec4(mix(red, yellow, lavaNoise), 1.0);
 
-    vec4 rockCol = vec4(mix(red, black, fbm), 1.0);
-    vec4 lavaCol = vec4(mix(red, yellow, lavaNoise), 1.0); //vec4(u_Color.r * noise, u_Color.g * noise2, u_Color.b * noise3, 1.0);
-
-    float rock = smoothstep(0.9, 0.99, fs_fbm);
+    float rock = smoothstep(0.9, 0.99, fs_fbm);  // what is rock
     float lava = 1.0 - rock;    // whatever is not rock is lava
 
     out_Col = rock * rockCol;
-
     out_Col += lava * lavaCol; 
-    // out_Col = vec4(vec3(1.0), step((fract(u_Time * 0.01)) * 0.5,perlinNoise3D(vec3(fs_Pos))));
 }
