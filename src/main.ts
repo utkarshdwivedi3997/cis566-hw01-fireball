@@ -152,12 +152,12 @@ function main() {
     time++;
 
     // Enable frontface culling: for rim outlining
-    gl.cullFace(gl.FRONT);
+    // gl.cullFace(gl.FRONT);
 
-    renderer.render(camera,
-      [ outerRim ],
-      [ rimShader ], 
-      color = color);
+    // renderer.render(camera,
+    //   [ outerRim ],
+    //   [ rimShader ], 
+    //   color = color);
 
     // Enable backface culling: for drawing base fireball
     gl.cullFace(gl.BACK);
