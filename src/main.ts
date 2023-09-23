@@ -40,15 +40,15 @@ let time = 0;
 
 
 function loadScene() {
-  fireballBase = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.baseTesselations);
+  fireballBase = new Icosphere(vec3.fromValues(0, 0, 0), 1.0, controls.baseTesselations);
   fireballBase.create();
 
-  outerRim = new Icosphere(vec3.fromValues(0,0,0), 0.9, controls.outerRimTesselations);
+  outerRim = new Icosphere(vec3.fromValues(0,0,0), 1.1, controls.outerRimTesselations);
   outerRim.create();
   
   square = new Square(vec3.fromValues(0, 0, 0));
   square.create();
-  cube = new Cube(vec3.fromValues(0, 0, 0));
+  cube = new Cube(vec3.fromValues(0, 5, 0));
   cube.create();
   time = 0;
 }
@@ -68,7 +68,7 @@ function setupShaders(gl: WebGL2RenderingContext)
 
     fireballShader: new ShaderProgram([
       new Shader(gl.VERTEX_SHADER, require('./shaders/fireball-vert.glsl')),
-      new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.glsl')),
+      new Shader(gl.FRAGMENT_SHADER, require('./shaders/fireball-frag.glsl')),
     ]),
 
     rimShader: new ShaderProgram([
@@ -124,15 +124,15 @@ function main() {
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
+  gl.frontFace(gl.CW);   // I think the faces in the icosphere are set with clockwise indices. Not sure, but this makes the inverted-hulling work for me
   gl.enable(gl.DEPTH_TEST);
-
+  gl.enable(gl.CULL_FACE);    // Optimization, but also needed for inverted-hull
+  
   // Enable transparency
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-  // Enable backface culling: good for optimization but also needed for inverted-hull rim outlining
-  gl.enable(gl.CULL_FACE);
-  gl.cullFace(gl.BACK);
+  // Better to use "dithered" transparency instead. Simply discard unwanted pixels in the shader
+  // Discarding will need depth testing
+  // gl.enable(gl.BLEND);
+  // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
   const {lambert, customShader, fireballShader, rimShader} = setupShaders(gl);
 
@@ -151,9 +151,20 @@ function main() {
     fireballShader.setTime(time);
     time++;
 
+    // Enable frontface culling: for rim outlining
+    gl.cullFace(gl.FRONT);
+
     renderer.render(camera,
-      [ fireballBase, outerRim ],
-      [ fireballShader, rimShader ], 
+      [ outerRim ],
+      [ rimShader ], 
+      color = color);
+
+    // Enable backface culling: for drawing base fireball
+    gl.cullFace(gl.BACK);
+
+    renderer.render(camera,
+      [ fireballBase ],
+      [ fireballShader ], 
       color = color);
 
     stats.end();
