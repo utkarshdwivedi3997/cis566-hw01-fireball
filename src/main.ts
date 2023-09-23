@@ -43,7 +43,7 @@ function loadScene() {
   fireballBase = new Icosphere(vec3.fromValues(0, 0, 0), 1.0, controls.baseTesselations);
   fireballBase.create();
 
-  outerRim = new Icosphere(vec3.fromValues(0,0,0), 1.1, controls.outerRimTesselations);
+  outerRim = new Icosphere(vec3.fromValues(0,0,0), 1.4, controls.outerRimTesselations);
   outerRim.create();
   
   square = new Square(vec3.fromValues(0, 0, 0));
@@ -152,12 +152,12 @@ function main() {
     time++;
 
     // Enable frontface culling: for rim outlining
-    // gl.cullFace(gl.FRONT);
+    gl.cullFace(gl.FRONT);
 
-    // renderer.render(camera,
-    //   [ outerRim ],
-    //   [ rimShader ], 
-    //   color = color);
+    renderer.render(camera,
+      [ outerRim ],
+      [ rimShader ], 
+      color = color);
 
     // Enable backface culling: for drawing base fireball
     gl.cullFace(gl.BACK);
