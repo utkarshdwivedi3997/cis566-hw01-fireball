@@ -119,6 +119,11 @@ float fbm(vec3 pos, float amp, float freq)
 }
 
 /* ================= EASING FUNCTIONS ================= */
+float easeInOutQuad(float x)
+{
+    return x < 0.5 ? 2.0 * x * x : 1.0 - pow(-2.0 * x + 2.0, 2.0) * 0.5;
+}
+
 float easeInOutCubic(float x)
 {
     return x < 0.5 ? 4.0 * x * x * x : 1.0 - pow(-2.0 * x + 2.0, 3.0) * 0.5;
@@ -128,42 +133,27 @@ float easeInOutCubic(float x)
 
 void main()
 {
-    // Material base color (before shading)
-    float noise = 1.0 - abs(perlinNoise3D(vec3(fs_Pos + sin(u_Time * 0.005)) * 2.0));
-    float noise2 = 1.0 - abs(perlinNoise3D(vec3(fs_Pos + cos(u_Time * 0.005)) * 3.0));
-    float noise3 = 1.0 - abs(perlinNoise3D(vec3(fs_Pos + sin(u_Time * 0.001)) * 1.0));
-
-    float noise4 = perlinNoise3D(vec3(fs_Pos * sin(u_Time* 0.005)) * 5.0);
-    vec4 diffuseColor = vec4(u_Color.r * noise, u_Color.g * noise2, u_Color.b * noise3, 0.8);
-
-    float amount = smoothstep(-1.0, 0.6, (fs_Pos.y + 1.0) * 0.5);
-
-    float fadeAmount = smoothstep(1.8, 0.0, (fs_Pos.y + 1.0) * 0.5);
-    // if (fs_Pos.y > 0.0)
-    // {
-    //     fadeAmount = fbm(vec3(noise * 0.01), 1.0, 2.0);
-    // }
-    // else
-    // {
-    //     fadeAmount = smoothstep(0.3, 0.0, (fs_Pos.y + 1.0) * 0.5);
-    // }
-    // fadeAmount = (1.0 - step(0.8, fadeAmount)) * perlinNoise3D(vec3(vec3(fs_Pos) * fadeAmount));
-    // if (perlinNoise3D(vec3(fs_Pos * fadeAmount)) < 0.2)
-    // {
-    //     discard;
-    // }
-
     vec3 movingPos = vec3(fs_Pos.x, fs_Pos.y - u_Time * 0.01, fs_Pos.z);
     float fbm1 = fbm(vec3(fs_Pos) * 2.0, 1.0, 1.0);
 
     float alpha = fbm(movingPos * 2.0 + fbm1, 1.0, 1.0) * 0.3;
-    // alpha = perlinNoise3D(vec3(fs_Pos) + alpha);
-    alpha = smoothstep(0.3, 0.35, alpha) * fadeAmount;
 
+    float yPosNormalized = (fs_Pos.y + 1.0) * 0.5;
+    float fadeAmount = smoothstep(1.0, -2.0, yPosNormalized);
 
-    vec3 smokeCol = vec3(1.0,0.0,0.0);
-    vec3 orange = vec3(0.8, 0.6, 0.0);
+    alpha = mix(alpha, 1.0, fadeAmount);
+    alpha = smoothstep(0.3, 0.35, alpha);
 
-    out_Col = vec4(mix(orange, smokeCol, easeInOutCubic(fadeAmount)), alpha);
-    // out_Col = vec4(vec3(1.0), step((fract(u_Time * 0.01)) * 0.5,perlinNoise3D(vec3(fs_Pos))));
+    vec3 red = vec3(1.0,0.0,0.0);
+    vec3 yellow = vec3(1.0, 1.0, 0.0);
+
+    if (alpha <= 0.0)
+    {
+        discard;
+    }
+
+    fadeAmount = mix(0.0, 1.0, easeInOutQuad(yPosNormalized));
+
+    
+    out_Col = vec4(mix(yellow, red, fadeAmount), alpha);
 }

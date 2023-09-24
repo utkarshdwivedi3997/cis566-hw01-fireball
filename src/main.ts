@@ -135,8 +135,8 @@ function main() {
   // Enable transparency
   // Better to use "dithered" transparency instead. Simply discard unwanted pixels in the shader
   // Discarding will need depth testing
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  // gl.enable(gl.BLEND);
+  // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
   const {lambert, customShader, fireballShader, rimShader} = setupShaders(gl);
 
