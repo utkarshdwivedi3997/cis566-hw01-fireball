@@ -87,17 +87,12 @@ void main()
 
     float stretchArea = smoothstep(0.5, 0.6, fs_Pos.y + 1.0 * 0.5);
 
+    // Stretch the glow in the Y direction
+    vec3 moveDir = vec3(0.0,1.0,0.0);
     vec3 teardropScale = vec3(1.0 + stretchArea * 0.001 / dist,
                               1.0 + stretchArea * 1.5 / dist,
                               1.0 + stretchArea * 0.001 / dist);
     fs_Pos.xyz *= teardropScale;
-    // float stretchY = mix(0.1, 1.2, stretchArea);
-
-    // fs_Pos.y += stretchArea * stretchY;
-
-    // float shrinkXZ = mix(0.0, 1.0, stretchArea);
-    // fs_Pos.xz = mix(fs_Pos.xz, vec2(0.0,0.0), stretchArea * shrinkXZ);
-    // fs_Pos += fs_Nor * perlinNoise3D(vec3(fs_Pos) * 2.0 + u_Time * 0.01) * 0.1;
 
     vec4 modelposition = u_Model * fs_Pos;   // Temporarily store the transformed vertex positions for use below
 
