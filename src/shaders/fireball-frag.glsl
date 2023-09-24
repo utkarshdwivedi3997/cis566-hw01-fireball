@@ -2,12 +2,11 @@
 
 precision highp float;
 
-uniform vec4 u_Color; // The color with which to render this instance of geometry.
+uniform vec4 u_Color1; // The color with which to render this instance of geometry.
+uniform vec4 u_Color2;
 
 // These are the interpolated values out of the rasterizer, so you can't know
 // their specific values without knowing the vertices that contributed to them
-in vec4 fs_Nor;
-in vec4 fs_Col;
 in vec4 fs_Pos;
 
 uniform float u_Time;
@@ -125,8 +124,7 @@ float fbm(vec3 pos, float amp, float freq)
 void main()
 {
     // Material base color (before shading)
-    vec3 yellow = vec3(1.0,1.0,0.0);
-    vec3 red = vec3(0.8,0.0,0.0);
+    vec3 col1 = u_Color1.rgb * 0.8;  // lower intensity
     vec3 grey1 = vec3(0.212,0.137,0.149);
     vec3 grey2 = vec3(0.384,0.384,0.4);
 
@@ -135,11 +133,11 @@ void main()
     float rockNoise = fbm(vec3(fs_Pos + fs_fbm * rockStriations) * 3.0, 2.0, 1.0) * 0.3;
 
     vec3 rockBase = mix(grey1, grey2, rockPattern);
-    vec4 rockCol = vec4(mix(red, rockBase, pow(rockNoise, 3.0)), 1.0);
+    vec4 rockCol = vec4(mix(col1, rockBase, pow(rockNoise, 3.0)), 1.0);
 
     float lavaNoise = fbm(vec3(fs_Pos * 4.0), 1.0, 2.0) * 0.5;
     lavaNoise = smoothstep(0.2, 0.7, (perlinNoise3D(vec3(fs_Pos + lavaNoise + u_Time * 0.001) * 3.0) + 1.0) * 0.5);
-    vec4 lavaCol = vec4(mix(red, yellow, lavaNoise), 1.0);
+    vec4 lavaCol = vec4(mix(col1, vec3(u_Color2), lavaNoise), 1.0);
 
     float rock = smoothstep(0.9, 0.99, fs_fbm);  // what is rock
     float lava = 1.0 - rock;    // whatever is not rock is lava

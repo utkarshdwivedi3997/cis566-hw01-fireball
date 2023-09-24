@@ -2,12 +2,11 @@
 
 precision highp float;
 
-uniform vec4 u_Color; // The color with which to render this instance of geometry.
+uniform vec4 u_Color1; // The color with which to render this instance of geometry.
+uniform vec4 u_Color2;
 
 // These are the interpolated values out of the rasterizer, so you can't know
 // their specific values without knowing the vertices that contributed to them
-in vec4 fs_Nor;
-in vec4 fs_Col;
 in vec4 fs_Pos;
 
 uniform float u_Time;
@@ -156,5 +155,5 @@ void main()
     fadeAmount = mix(0.0, 1.0, easeInOutQuad(yPosNormalized));
 
     
-    out_Col = vec4(mix(yellow, red, fadeAmount), alpha);
+    out_Col = vec4(mix(vec3(u_Color2), vec3(u_Color1), fadeAmount), alpha);
 }

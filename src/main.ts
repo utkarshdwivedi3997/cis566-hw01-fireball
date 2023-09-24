@@ -27,7 +27,8 @@ const controls = {
   showOuterVortex: true,
   outerVortexTesselations: 4,
   'Load Scene': loadScene, // A function pointer, essentially
-  Color: [255,255,255,1]  // default Red color
+  primaryColor: [255,0,0,1],  // default Red color
+  secondaryColor: [255,255,0,1] // default Yellow color
 };
 
 function setupGui()
@@ -40,7 +41,8 @@ function setupGui()
   gui.add(controls, 'showOuterVortex', "Show Outer Vortex");
   gui.add(controls, 'outerVortexTesselations', 0, 7).step(1).name("Outer Vortex Detail");
   gui.add(controls, 'Load Scene');
-  gui.addColor(controls, 'Color');
+  gui.addColor(controls, 'primaryColor').name("Primary Color");
+  gui.addColor(controls, 'secondaryColor').name("Secondary Color");
 }
 
 let fireballBase: Icosphere;
@@ -143,6 +145,11 @@ function handleInput()
   }
 }
 
+function getColor(colorArr: number[])
+{
+  return vec4.fromValues(colorArr[0] / 255.0, colorArr[1] / 255.0, colorArr[2] / 255.0, colorArr[3]);
+}
+
 function main() {
   // Initial display for framerate
   const stats = Stats();
@@ -176,6 +183,8 @@ function main() {
   gl.enable(gl.CULL_FACE);    // Optimization, but also needed for inverted-hull
 
   const {lambert, customShader, fireballShader, rimShader, vortexShader, backgroundShader} = setupShaders(gl);
+  let primaryColor: vec4;
+  let secondaryColor: vec4;
 
   // This function will be called every frame
   function tick() {
@@ -189,8 +198,16 @@ function main() {
     renderer.clear();
 
     handleInput();
+    
+    primaryColor = getColor(controls.primaryColor);
+    secondaryColor = getColor(controls.secondaryColor);
 
-    let color = vec4.fromValues(controls.Color[0] / 255.0, controls.Color[1] / 255.0, controls.Color[2] / 255.0, controls.Color[3])
+    rimShader.setColor1(primaryColor);
+    rimShader.setColor2(secondaryColor);
+    fireballShader.setColor1(primaryColor);
+    fireballShader.setColor2(secondaryColor);
+    vortexShader.setColor1(primaryColor);
+    vortexShader.setColor2(secondaryColor);
     
     rimShader.setTime(time);
     fireballShader.setTime(time);
@@ -206,8 +223,7 @@ function main() {
     gl.disable(gl.DEPTH_TEST);
     renderer.render(camera,
       [ square ],
-      [ backgroundShader ], 
-      color = vec4.fromValues(1,1,1,1));
+      [ backgroundShader ]);
     gl.enable(gl.DEPTH_TEST);
 
     if (controls.showOuterRim)
@@ -217,8 +233,7 @@ function main() {
 
       renderer.render(camera,
         [ outerRim ],
-        [ rimShader ], 
-        color = color);
+        [ rimShader ]);
     }
 
     // Enable backface culling: for drawing base fireball
@@ -228,14 +243,12 @@ function main() {
     {
       renderer.render(camera,
         [ outerVortex ],
-        [ vortexShader ], 
-        color = color);
+        [ vortexShader ]);
     }
 
     renderer.render(camera,
       [ fireballBase ],
-      [ fireballShader ], 
-      color = color);
+      [ fireballShader ]);
 
     stats.end();
     

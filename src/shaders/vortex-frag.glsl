@@ -2,12 +2,11 @@
 
 precision highp float;
 
-uniform vec4 u_Color; // The color with which to render this instance of geometry.
+uniform vec4 u_Color1; // The color with which to render this instance of geometry.
+uniform vec4 u_Color2;
 
 // These are the interpolated values out of the rasterizer, so you can't know
 // their specific values without knowing the vertices that contributed to them
-in vec4 fs_Nor;
-in vec4 fs_Col;
 in vec4 fs_Pos;
 in vec2 fs_UV;
 
@@ -76,8 +75,11 @@ void main()
         discard;
     }
 
-    vec3 outCol1 = mix(red, white, alpha);  // gradient between red and white for slower speeds
-    vec3 outCol2 = mix(yellow, red, smoothstep(1.0, -1.0, fs_Pos.y));  // gradient between yellow and red based on y pos
+    vec3 col1 = vec3(u_Color1);
+    vec3 col2 = vec3(u_Color2);
+
+    vec3 outCol1 = mix(col1, white, alpha);  // gradient between red and white for slower speeds
+    vec3 outCol2 = mix(col2, col1, smoothstep(1.0, -1.0, fs_Pos.y));  // gradient between yellow and red based on y pos
     vec3 outCol3 = mix(outCol2, white, alpha);  // gradient between the above gradient and white for higher speeds
 
     out_Col = vec4(mix(outCol1, outCol3, u_Speed), 1.0);
