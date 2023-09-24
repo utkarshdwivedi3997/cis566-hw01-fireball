@@ -18,6 +18,7 @@ in vec4 vs_Nor;             // The array of vertex normals passed to the shader
 
 in vec4 vs_Col;             // The array of vertex colors passed to the shader.
 uniform float u_Time;
+uniform float u_Speed;
 
 out vec4 fs_Nor;            // The array of normals that has been transformed by u_ModelInvTr. This is implicitly passed to the fragment shader.
 out vec4 fs_Col;            // The color of each vertex. This is implicitly passed to the fragment shader.
@@ -153,7 +154,7 @@ void main()
     vec3 teardropScale = vec3(1.0 + stretchArea * 0.001 / dist,
                               1.0 + stretchArea * 1.5 / dist,
                               1.0 + stretchArea * 0.001 / dist);
-    fs_Pos.xyz *= teardropScale;
+    fs_Pos.xyz *= mix(vec3(1.0), teardropScale, u_Speed);
 
     // Apply noise
     vec3 movingPos = vec3(fs_Pos.x, fs_Pos.y - u_Time * 0.01, fs_Pos.z);

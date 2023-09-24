@@ -16,6 +16,7 @@ const OUTER_RIM_SCALE = 1.3;
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
+  speed: 0.0,
   baseTesselations: 5,
   outerRimTesselations: 4,
   'Load Scene': loadScene, // A function pointer, essentially
@@ -25,6 +26,7 @@ const controls = {
 function setupGui()
 {
   const gui = new DAT.GUI();
+  gui.add(controls, 'speed', 0.0, 1.0);
   gui.add(controls, 'baseTesselations', 0, 8).step(1);
   gui.add(controls, 'outerRimTesselations', 0, 7).step(1);
   gui.add(controls, 'Load Scene');
@@ -153,6 +155,8 @@ function main() {
     
     rimShader.setTime(time);
     fireballShader.setTime(time);
+    rimShader.setSpeed(controls.speed);
+    fireballShader.setSpeed(controls.speed);
     time++;
 
     // Enable frontface culling: for rim outlining
