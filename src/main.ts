@@ -195,9 +195,11 @@ function main() {
     rimShader.setTime(time);
     fireballShader.setTime(time);
     vortexShader.setTime(time);
+    backgroundShader.setTime(time);
     rimShader.setSpeed(controls.speed);
     fireballShader.setSpeed(controls.speed);
     vortexShader.setSpeed(controls.speed);
+    backgroundShader.setSpeed(controls.speed);
     time++;
 
     // Render background quad
