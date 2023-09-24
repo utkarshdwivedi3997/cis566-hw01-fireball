@@ -14,6 +14,9 @@ const FIREBALL_BASE_SCALE = 1.0;
 const OUTER_RIM_SCALE = 1.3;
 const OUTER_VORTEX_SCALE = 1.32;
 
+const CAMERA_SLOW_POS = vec3.fromValues(0,0,3);
+const CAMERA_FAST_POS = vec3.fromValues(0,0,7);
+
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
@@ -51,8 +54,18 @@ let prevOuterRimTesselations: number = 4;
 let prevOuterVortexTesselations: number = 4;
 let time = 0;
 
-/* ============= SHADERS ============= */
+/* ============= MAIN CODE ============= */
 
+
+function mix(a: vec3, b: vec3, t: number)
+{
+  return vec3.fromValues(a[0]*t + (1.0 - t) * b[0], a[1]*t + (1.0-t)*b[1], a[2]*t + (1.0-t)*b[2]);
+}
+
+function smoothstep (edge0: number, edge1: number, t: number) {
+  t = Math.min(Math.max((t - edge0) / (edge1 - edge0), 0.0), 1.0);
+    return t * t * (3.0 - 2.0 * t);
+};
 
 function loadScene() {
   fireballBase = new Icosphere(vec3.fromValues(0, 0, 0), FIREBALL_BASE_SCALE, controls.baseTesselations);
@@ -150,7 +163,7 @@ function main() {
   // Initial call to load scene
   loadScene();
 
-  const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
+  const camera = new Camera(CAMERA_SLOW_POS, vec3.fromValues(0, 0, 0));
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
@@ -162,6 +175,10 @@ function main() {
 
   // This function will be called every frame
   function tick() {
+    // If the speed has changed, zoom the camera in / out
+    let pos = mix(CAMERA_SLOW_POS, CAMERA_FAST_POS, 1.0 - controls.speed);
+    camera.setPosition(pos);
+
     camera.update();
     stats.begin();
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
