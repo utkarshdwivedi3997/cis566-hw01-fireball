@@ -148,17 +148,17 @@ void main()
     float dist = distance(vec3(fs_Pos), vec3(0.0,0.0,0.0));
 
 
-    float stretchArea = smoothstep(0.5, 0.6, (fs_Pos.y + 1.0) * 0.5);
+    float stretchArea = smoothstep(0.5, 0.6, (fs_Pos.y + 1.0) * 0.5) * u_Speed;
 
     // Stretch the glow in the Y direction
     vec3 teardropScale = vec3(1.0 + stretchArea * 0.001 / dist,
-                              1.0 + stretchArea * 1.5 / dist,
+                              1.0 + stretchArea * 3.0 / dist,
                               1.0 + stretchArea * 0.001 / dist);
-    fs_Pos.xyz *= mix(vec3(1.0), teardropScale, u_Speed);
+    fs_Pos.xyz *= teardropScale;//mix(vec3(1.0), teardropScale, u_Speed);
 
     // Apply noise
-    vec3 movingPos = vec3(fs_Pos.x, fs_Pos.y - u_Time * 0.01, fs_Pos.z);
-    float perlin = perlinNoise3D(vec3(movingPos * 2.0));
+    vec3 movingPos = vec3(fs_Pos.x, fs_Pos.y - u_Time * (u_Speed + 0.05) * 0.03, fs_Pos.z);
+    float perlin = perlinNoise3D(vec3(movingPos * 3.0));
     fs_Pos += fs_Nor * perlin * 0.08;
     fs_Pos += fs_Nor * fbm(vec3(fs_Pos) * 5.0, 1.0, smoothstep(0.5, 0.8, 1.0 - stretchArea) * 10.0) * 0.05;
 

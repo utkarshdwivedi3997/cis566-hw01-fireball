@@ -18,6 +18,7 @@ in vec4 vs_Nor;             // The array of vertex normals passed to the shader
 
 in vec4 vs_Col;             // The array of vertex colors passed to the shader.
 uniform float u_Time;
+uniform float u_Speed;
 
 out vec4 fs_Nor;            // The array of normals that has been transformed by u_ModelInvTr. This is implicitly passed to the fragment shader.
 out vec4 fs_Col;            // The color of each vertex. This is implicitly passed to the fragment shader.
@@ -146,7 +147,7 @@ void main()
 
     fs_Pos = vs_Pos;
     // Perlin: large scale noise displacement with slow movement
-    fs_perlin = perlinNoise3D(vec3(fs_Pos) * 5.0 + u_Time * 0.003) * 0.1;
+    fs_perlin = perlinNoise3D(vec3(fs_Pos) * 5.0 + u_Time * 0.003) * 0.15 * u_Speed;
 
     // FBM: static "rocks" area. This should never move
     fs_fbm = fbm(vec3(fs_Pos), 1.0, 4.0);
@@ -154,7 +155,7 @@ void main()
 
     float movingArea = 1.0 - fs_fbm;
     float shouldMove = smoothstep(0.05, 0.15, movingArea);      // where the lava should move, affected by fine fbm + bigger perlin
-    fs_Pos -= fs_Nor * shouldMove * fs_perlin;
+    fs_Pos -= fs_Nor * shouldMove * fs_perlin * u_Speed;
 
     vec4 modelposition = u_Model * fs_Pos;   // Temporarily store the transformed vertex positions for use below
 

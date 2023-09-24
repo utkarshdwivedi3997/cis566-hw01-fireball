@@ -11,6 +11,7 @@ in vec4 fs_Col;
 in vec4 fs_Pos;
 
 uniform float u_Time;
+uniform float u_Speed;
 
 out vec4 out_Col; // This is the final output color that you will see on your
                   // screen for the pixel that is currently being processed.
@@ -133,13 +134,13 @@ float easeInOutCubic(float x)
 
 void main()
 {
-    vec3 movingPos = vec3(fs_Pos.x, fs_Pos.y - u_Time * 0.01, fs_Pos.z);
+    vec3 movingPos = vec3(fs_Pos.x, fs_Pos.y - u_Time * 0.02 * u_Speed, fs_Pos.z);
     float fbm1 = fbm(vec3(fs_Pos) * 2.0, 1.0, 1.0);
 
     float alpha = fbm(movingPos * 2.0 + fbm1, 1.0, 1.0) * 0.3;
 
     float yPosNormalized = (fs_Pos.y + 1.0) * 0.5;
-    float fadeAmount = smoothstep(1.0, -2.0, yPosNormalized);
+    float fadeAmount = smoothstep(1.5 * u_Speed, -2.0, yPosNormalized);
 
     alpha = mix(alpha, 1.0, fadeAmount);
     alpha = smoothstep(0.3, 0.35, alpha);

@@ -11,6 +11,7 @@ in vec4 fs_Col;
 in vec4 fs_Pos;
 
 uniform float u_Time;
+uniform float u_Speed;
 
 out vec4 out_Col; // This is the final output color that you will see on your
                   // screen for the pixel that is currently being processed.
@@ -130,7 +131,7 @@ void main()
     vec3 grey2 = vec3(0.384,0.384,0.4);
 
     float rockPattern = perlinNoise3D(vec3(fs_Pos * 50.0) * 5.0);
-    float rockStriations = 1.0 - abs(perlinNoise3D(vec3(fs_Pos + u_Time * 0.0001) * 2.0));
+    float rockStriations = 1.0 - abs(perlinNoise3D(vec3(fs_Pos + u_Time * 0.0001 * u_Speed) * 2.0));
     float rockNoise = fbm(vec3(fs_Pos + fs_fbm * rockStriations) * 3.0, 2.0, 1.0) * 0.3;
 
     vec3 rockBase = mix(grey1, grey2, rockPattern);
