@@ -154,7 +154,10 @@ void main()
     vec3 teardropScale = vec3(1.0 + stretchArea * 0.001 / dist,
                               1.0 + stretchArea * 3.0 / dist,
                               1.0 + stretchArea * 0.001 / dist);
-    fs_Pos.xyz *= teardropScale;//mix(vec3(1.0), teardropScale, u_Speed);
+
+    vec3 hideScale = vec3(0.8);  // hide the rim when the fireball is stationary
+    vec3 scale = mix(hideScale, teardropScale, smoothstep(0.0, 0.1, u_Speed));
+    fs_Pos.xyz *= scale;
 
     // Apply noise
     vec3 movingPos = vec3(fs_Pos.x, fs_Pos.y - u_Time * (u_Speed + 0.05) * 0.03, fs_Pos.z);

@@ -133,6 +133,17 @@ float fbm(vec3 pos, float amp, float freq)
     return total;
 }
 
+vec3 rotateY(vec3 pos, float angle)
+{
+    float s = sin(angle);
+    float c = cos(angle);
+    
+    return mat3(c, 0, -s,
+                0, 1, 0,
+                s, 0, c) * pos;
+}
+
+
 /* ================= MAIN SHADER CODE ================= */
 
 void main()
@@ -146,6 +157,7 @@ void main()
                                                             // the model matrix.
 
     fs_Pos = vs_Pos;
+
     // Perlin: large scale noise displacement with slow movement
     fs_perlin = perlinNoise3D(vec3(fs_Pos) * 5.0 + u_Time * 0.003) * 0.15 * u_Speed;
 
@@ -156,6 +168,10 @@ void main()
     float movingArea = 1.0 - fs_fbm;
     float shouldMove = smoothstep(0.05, 0.15, movingArea);      // where the lava should move, affected by fine fbm + bigger perlin
     fs_Pos -= fs_Nor * shouldMove * fs_perlin * u_Speed;
+
+    // rotate the fireball when it's stationary
+    float rot = smoothstep(0.3, 0.1, u_Speed);
+    fs_Pos.xyz = rotateY(vec3(fs_Pos.xyz), -rot * u_Time * 0.001);
 
     vec4 modelposition = u_Model * fs_Pos;   // Temporarily store the transformed vertex positions for use below
 
