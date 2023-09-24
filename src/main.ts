@@ -77,8 +77,8 @@ function loadScene() {
   outerVortex = new Icosphere(vec3.fromValues(0,0,0), OUTER_VORTEX_SCALE, controls.outerVortexTesselations);
   outerVortex.create();
 
-  // square = new Square(vec3.fromValues(0, 0, 0));
-  // square.create();
+  square = new Square(vec3.fromValues(0, 0, -5));
+  square.create();
   // cube = new Cube(vec3.fromValues(0, 5, 0));
   // cube.create();
   time = 0;
@@ -110,6 +110,11 @@ function setupShaders(gl: WebGL2RenderingContext)
     vortexShader: new ShaderProgram([
       new Shader(gl.VERTEX_SHADER, require('./shaders/vortex-vert.glsl')),
       new Shader(gl.FRAGMENT_SHADER, require('./shaders/vortex-frag.glsl')),
+    ]),
+
+    backgroundShader: new ShaderProgram([
+      new Shader(gl.VERTEX_SHADER, require('./shaders/background-vert.glsl')),
+      new Shader(gl.FRAGMENT_SHADER, require('./shaders/background-frag.glsl')),
     ]),
   };
 }
@@ -168,10 +173,9 @@ function main() {
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
   gl.frontFace(gl.CW);   // I think the faces in the icosphere are set with clockwise indices. Not sure, but this makes the inverted-hulling work for me
-  gl.enable(gl.DEPTH_TEST);
   gl.enable(gl.CULL_FACE);    // Optimization, but also needed for inverted-hull
 
-  const {lambert, customShader, fireballShader, rimShader, vortexShader} = setupShaders(gl);
+  const {lambert, customShader, fireballShader, rimShader, vortexShader, backgroundShader} = setupShaders(gl);
 
   // This function will be called every frame
   function tick() {
@@ -195,6 +199,14 @@ function main() {
     fireballShader.setSpeed(controls.speed);
     vortexShader.setSpeed(controls.speed);
     time++;
+
+    // Render background quad
+    gl.disable(gl.DEPTH_TEST);
+    renderer.render(camera,
+      [ square ],
+      [ backgroundShader ], 
+      color = vec4.fromValues(1,1,1,1));
+    gl.enable(gl.DEPTH_TEST);
 
     if (controls.showOuterRim)
     {
