@@ -29,6 +29,12 @@ out vec4 fs_LightVec;       // The direction in which our virtual light lies, re
 
 /* =============== NOISE FUNCTIONS ================= */
 
+float noise3D(vec3 p)
+{
+        return fract(sin(dot(p, vec3(127.1,269.5, 191.2))) *
+                     43758.5453);
+}
+
 vec3 random3(vec3 p)
 {
     return fract(sin(vec3(dot(p,vec3(127.1f, 311.7f, 191.999f)),
@@ -68,6 +74,62 @@ float perlinNoise3D(vec3 p)
     return surfletSum;
 }
 
+// FBM
+
+float interpNoise3D(float x, float y, float z)
+{
+    int intX = int(floor(x));
+    float fractX = fract(x);
+    int intY = int(floor(y));
+    float fractY = fract(y);
+    int intZ = int(floor(z));
+    float fractZ = fract(z);
+
+    // 4 points on Z1 depth
+    float v1 = noise3D(vec3(intX, intY, intZ));
+    float v2 = noise3D(vec3(intX + 1, intY, intZ));
+
+    float v3 = noise3D(vec3(intX, intY + 1, intZ));
+    float v4 = noise3D(vec3(intX + 1, intY + 1, intZ));
+
+    // Bilinear on Z1 depth
+    float i1 = mix(v1, v2, fractX);
+    float i2 = mix(v3, v4, fractX);
+    float iz1 = mix(i1, i2, fractY);
+
+    // 4 points on Z2 depth
+    float v5 = noise3D(vec3(intX, intY, intZ + 1));
+    float v6 = noise3D(vec3(intX + 1, intY, intZ + 1));
+
+    float v7 = noise3D(vec3(intX, intY + 1, intZ + 1));
+    float v8 = noise3D(vec3(intX + 1, intY + 1, intZ + 1));
+
+    // Bilinear on Z2 depth
+    float i3 = mix(v5, v6, fractX);
+    float i4 = mix(v7, v8, fractX);
+    float iz2 = mix(i3, i4, fractY);
+
+    // Final trilinear
+    return mix(iz1, iz2, fractZ);
+}
+
+float fbm(vec3 pos, float amp, float freq)
+{
+    float total = 0.0;
+    float persistence = 0.5;
+    int octaves = 8;
+
+    for(int i = 1; i <= octaves; i++) {
+        total += interpNoise3D(pos.x * freq,
+                               pos.y * freq,
+                               pos.z * freq) * amp;
+
+        freq *= 2.f;
+        amp *= persistence;
+    }
+    return total;
+}
+
 /* ================= MAIN SHADER CODE ================= */
 
 void main()
@@ -85,14 +147,19 @@ void main()
     float dist = distance(vec3(fs_Pos), vec3(0.0,0.0,0.0));
 
 
-    float stretchArea = smoothstep(0.5, 0.6, fs_Pos.y + 1.0 * 0.5);
+    float stretchArea = smoothstep(0.5, 0.6, (fs_Pos.y + 1.0) * 0.5);
 
     // Stretch the glow in the Y direction
-    vec3 moveDir = vec3(0.0,1.0,0.0);
     vec3 teardropScale = vec3(1.0 + stretchArea * 0.001 / dist,
                               1.0 + stretchArea * 1.5 / dist,
                               1.0 + stretchArea * 0.001 / dist);
     fs_Pos.xyz *= teardropScale;
+
+    // Apply noise
+    vec3 movingPos = vec3(fs_Pos.x, fs_Pos.y - u_Time * 0.01, fs_Pos.z);
+    float perlin = perlinNoise3D(vec3(movingPos * 2.0));
+    fs_Pos += fs_Nor * perlin * 0.08;
+    fs_Pos += fs_Nor * fbm(vec3(fs_Pos) * 5.0, 1.0, smoothstep(0.5, 0.8, 1.0 - stretchArea) * 10.0) * 0.05;
 
     vec4 modelposition = u_Model * fs_Pos;   // Temporarily store the transformed vertex positions for use below
 

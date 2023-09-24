@@ -9,11 +9,15 @@ import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 
+// consts
+const FIREBALL_BASE_SCALE = 1.0;
+const OUTER_RIM_SCALE = 1.3;
+
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
   baseTesselations: 5,
-  outerRimTesselations: 3,
+  outerRimTesselations: 4,
   'Load Scene': loadScene, // A function pointer, essentially
   Color: [255,255,255,1]  // default Red color
 };
@@ -22,7 +26,7 @@ function setupGui()
 {
   const gui = new DAT.GUI();
   gui.add(controls, 'baseTesselations', 0, 8).step(1);
-  gui.add(controls, 'outerRimTesselations', 0, 5).step(1);
+  gui.add(controls, 'outerRimTesselations', 0, 7).step(1);
   gui.add(controls, 'Load Scene');
   gui.addColor(controls, 'Color');
 }
@@ -32,18 +36,18 @@ let outerRim: Icosphere;
 
 let square: Square;
 let cube: Cube;
-let prevBaseTesselations: number = 5;
-let prevOuterRimTesselations: number = 3;
+let prevBaseTesselations: number = 7;
+let prevOuterRimTesselations: number = 5;
 let time = 0;
 
 /* ============= SHADERS ============= */
 
 
 function loadScene() {
-  fireballBase = new Icosphere(vec3.fromValues(0, 0, 0), 1.0, controls.baseTesselations);
+  fireballBase = new Icosphere(vec3.fromValues(0, 0, 0), FIREBALL_BASE_SCALE, controls.baseTesselations);
   fireballBase.create();
 
-  outerRim = new Icosphere(vec3.fromValues(0,0,0), 1.4, controls.outerRimTesselations);
+  outerRim = new Icosphere(vec3.fromValues(0,0,0), OUTER_RIM_SCALE, controls.outerRimTesselations);
   outerRim.create();
   
   square = new Square(vec3.fromValues(0, 0, 0));
@@ -83,14 +87,14 @@ function handleInput()
   if(controls.baseTesselations != prevBaseTesselations)
   {
     prevBaseTesselations = controls.baseTesselations;
-    fireballBase = new Icosphere(vec3.fromValues(0, 0, 0), 1, prevBaseTesselations);
+    fireballBase = new Icosphere(vec3.fromValues(0, 0, 0), FIREBALL_BASE_SCALE, prevBaseTesselations);
     fireballBase.create();
   }
 
   if (controls.outerRimTesselations != prevOuterRimTesselations)
   {
     prevOuterRimTesselations = controls.outerRimTesselations;
-    outerRim = new Icosphere(vec3.fromValues(0,0,0), 1.1, prevOuterRimTesselations);
+    outerRim = new Icosphere(vec3.fromValues(0,0,0), OUTER_RIM_SCALE, prevOuterRimTesselations);
     outerRim.create();
   }
 }
@@ -131,8 +135,8 @@ function main() {
   // Enable transparency
   // Better to use "dithered" transparency instead. Simply discard unwanted pixels in the shader
   // Discarding will need depth testing
-  // gl.enable(gl.BLEND);
-  // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
   const {lambert, customShader, fireballShader, rimShader} = setupShaders(gl);
 
