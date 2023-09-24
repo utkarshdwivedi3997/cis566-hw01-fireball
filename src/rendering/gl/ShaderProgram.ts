@@ -31,6 +31,7 @@ class ShaderProgram {
   unifColor: WebGLUniformLocation;
   unifTime: WebGLUniformLocation;
   unifSpeed: WebGLUniformLocation;
+  unifAngle: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -52,6 +53,7 @@ class ShaderProgram {
     this.unifColor      = gl.getUniformLocation(this.prog, "u_Color");
     this.unifTime       = gl.getUniformLocation(this.prog, "u_Time");
     this.unifSpeed      = gl.getUniformLocation(this.prog, "u_Speed");
+    this.unifAngle      = gl.getUniformLocation(this.prog, "u_Angle");
   }
 
   use() {

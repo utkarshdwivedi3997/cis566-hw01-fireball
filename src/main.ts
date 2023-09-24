@@ -12,6 +12,7 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 // consts
 const FIREBALL_BASE_SCALE = 1.0;
 const OUTER_RIM_SCALE = 1.3;
+const OUTER_VORTEX_SCALE = 1.32;
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
@@ -20,6 +21,8 @@ const controls = {
   baseTesselations: 5,
   showOuterRim: true,
   outerRimTesselations: 4,
+  showOuterVortex: true,
+  outerVortexTesselations: 4,
   'Load Scene': loadScene, // A function pointer, essentially
   Color: [255,255,255,1]  // default Red color
 };
@@ -30,18 +33,22 @@ function setupGui()
   gui.add(controls, 'speed', 0.0, 1.0).name("Fireball Speed");
   gui.add(controls, 'baseTesselations', 0, 8).step(1).name("Base Fireball Detail");
   gui.add(controls, 'showOuterRim', "Show Outer Trail");
-  gui.add(controls, 'outerRimTesselations', 0, 7).step(1).name("Outer Rim Detail");
+  gui.add(controls, 'outerRimTesselations', 0, 5).step(1).name("Outer Rim Detail");
+  gui.add(controls, 'showOuterVortex', "Show Outer Vortex");
+  gui.add(controls, 'outerVortexTesselations', 0, 7).step(1).name("Outer Vortex Detail");
   gui.add(controls, 'Load Scene');
   gui.addColor(controls, 'Color');
 }
 
 let fireballBase: Icosphere;
 let outerRim: Icosphere;
+let outerVortex: Icosphere;
 
 let square: Square;
 let cube: Cube;
-let prevBaseTesselations: number = 7;
-let prevOuterRimTesselations: number = 5;
+let prevBaseTesselations: number = 5;
+let prevOuterRimTesselations: number = 4;
+let prevOuterVortexTesselations: number = 4;
 let time = 0;
 
 /* ============= SHADERS ============= */
@@ -53,11 +60,14 @@ function loadScene() {
 
   outerRim = new Icosphere(vec3.fromValues(0,0,0), OUTER_RIM_SCALE, controls.outerRimTesselations);
   outerRim.create();
-  
-  square = new Square(vec3.fromValues(0, 0, 0));
-  square.create();
-  cube = new Cube(vec3.fromValues(0, 5, 0));
-  cube.create();
+
+  outerVortex = new Icosphere(vec3.fromValues(0,0,0), OUTER_VORTEX_SCALE, controls.outerVortexTesselations);
+  outerVortex.create();
+
+  // square = new Square(vec3.fromValues(0, 0, 0));
+  // square.create();
+  // cube = new Cube(vec3.fromValues(0, 5, 0));
+  // cube.create();
   time = 0;
 }
 
@@ -83,6 +93,11 @@ function setupShaders(gl: WebGL2RenderingContext)
       new Shader(gl.VERTEX_SHADER, require('./shaders/rim-vert.glsl')),
       new Shader(gl.FRAGMENT_SHADER, require('./shaders/rim-frag.glsl')),
     ]),
+
+    vortexShader: new ShaderProgram([
+      new Shader(gl.VERTEX_SHADER, require('./shaders/vortex-vert.glsl')),
+      new Shader(gl.FRAGMENT_SHADER, require('./shaders/vortex-frag.glsl')),
+    ]),
   };
 }
 
@@ -100,6 +115,13 @@ function handleInput()
     prevOuterRimTesselations = controls.outerRimTesselations;
     outerRim = new Icosphere(vec3.fromValues(0,0,0), OUTER_RIM_SCALE, prevOuterRimTesselations);
     outerRim.create();
+  }
+
+  if (controls.outerVortexTesselations != prevOuterVortexTesselations)
+  {
+    prevOuterVortexTesselations = controls.outerVortexTesselations;
+    outerVortex = new Icosphere(vec3.fromValues(0,0,0), OUTER_VORTEX_SCALE, prevOuterVortexTesselations);
+    outerVortex.create();
   }
 }
 
@@ -135,14 +157,8 @@ function main() {
   gl.frontFace(gl.CW);   // I think the faces in the icosphere are set with clockwise indices. Not sure, but this makes the inverted-hulling work for me
   gl.enable(gl.DEPTH_TEST);
   gl.enable(gl.CULL_FACE);    // Optimization, but also needed for inverted-hull
-  
-  // Enable transparency
-  // Better to use "dithered" transparency instead. Simply discard unwanted pixels in the shader
-  // Discarding will need depth testing
-  // gl.enable(gl.BLEND);
-  // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-  const {lambert, customShader, fireballShader, rimShader} = setupShaders(gl);
+  const {lambert, customShader, fireballShader, rimShader, vortexShader} = setupShaders(gl);
 
   // This function will be called every frame
   function tick() {
@@ -157,8 +173,10 @@ function main() {
     
     rimShader.setTime(time);
     fireballShader.setTime(time);
+    vortexShader.setTime(time);
     rimShader.setSpeed(controls.speed);
     fireballShader.setSpeed(controls.speed);
+    vortexShader.setSpeed(controls.speed);
     time++;
 
     if (controls.showOuterRim)
@@ -174,6 +192,14 @@ function main() {
 
     // Enable backface culling: for drawing base fireball
     gl.cullFace(gl.BACK);
+
+    if (controls.showOuterVortex)
+    {
+      renderer.render(camera,
+        [ outerVortex ],
+        [ vortexShader ], 
+        color = color);
+    }
 
     renderer.render(camera,
       [ fireballBase ],
