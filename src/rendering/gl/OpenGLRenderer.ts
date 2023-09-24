@@ -41,8 +41,6 @@ class OpenGLRenderer {
       
       prog.draw(drawable);
     }
-    for (let drawable of drawables) {
-    }
   }
 };
 
