@@ -18,6 +18,7 @@ const OUTER_RIM_SCALE = 1.3;
 const controls = {
   speed: 0.0,
   baseTesselations: 5,
+  showOuterRim: true,
   outerRimTesselations: 4,
   'Load Scene': loadScene, // A function pointer, essentially
   Color: [255,255,255,1]  // default Red color
@@ -26,9 +27,10 @@ const controls = {
 function setupGui()
 {
   const gui = new DAT.GUI();
-  gui.add(controls, 'speed', 0.0, 1.0);
-  gui.add(controls, 'baseTesselations', 0, 8).step(1);
-  gui.add(controls, 'outerRimTesselations', 0, 7).step(1);
+  gui.add(controls, 'speed', 0.0, 1.0).name("Fireball Speed");
+  gui.add(controls, 'baseTesselations', 0, 8).step(1).name("Base Fireball Detail");
+  gui.add(controls, 'showOuterRim', "Show Outer Trail");
+  gui.add(controls, 'outerRimTesselations', 0, 7).step(1).name("Outer Rim Detail");
   gui.add(controls, 'Load Scene');
   gui.addColor(controls, 'Color');
 }
@@ -159,13 +161,16 @@ function main() {
     fireballShader.setSpeed(controls.speed);
     time++;
 
-    // Enable frontface culling: for rim outlining
-    gl.cullFace(gl.FRONT);
+    if (controls.showOuterRim)
+    {
+      // Enable frontface culling: for rim outlining
+      gl.cullFace(gl.FRONT);
 
-    renderer.render(camera,
-      [ outerRim ],
-      [ rimShader ], 
-      color = color);
+      renderer.render(camera,
+        [ outerRim ],
+        [ rimShader ], 
+        color = color);
+    }
 
     // Enable backface culling: for drawing base fireball
     gl.cullFace(gl.BACK);
