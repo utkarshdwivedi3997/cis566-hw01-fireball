@@ -16,6 +16,10 @@ const OUTER_VORTEX_SCALE = 1.32;
 
 const CAMERA_SLOW_POS = vec3.fromValues(0,0,3);
 const CAMERA_FAST_POS = vec3.fromValues(0,0,7);
+const AUTO_SPEEDUP_TIMER = 1000.0;
+const AUTO_SPEEDUP_DURATION = 2000.0;
+const AUTO_SPEEDDOWN_TIMER = 1000.0;
+const AUTO_SPEEDDOWN_DURATION = 200.0;
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
@@ -25,7 +29,6 @@ const controls = {
   showOuterRim: true,
   outerRimTesselations: 4,
   showOuterVortex: true,
-  outerVortexTesselations: 4,
   'Load Scene': loadScene, // A function pointer, essentially
   primaryColor: [255,0,0,1],  // default Red color
   secondaryColor: [255,255,0,1], // default Yellow color
@@ -35,16 +38,15 @@ const controls = {
 function setupGui()
 {
   const gui = new DAT.GUI();
-  gui.add(controls, 'speed', 0.0, 1.0).name("Fireball Speed");
-  gui.add(controls, 'baseTesselations', 0, 8).step(1).name("Base Fireball Detail");
-  gui.add(controls, 'showOuterRim', "Show Outer Trail");
-  gui.add(controls, 'outerRimTesselations', 0, 5).step(1).name("Outer Rim Detail");
-  gui.add(controls, 'showOuterVortex', "Show Outer Vortex");
-  gui.add(controls, 'outerVortexTesselations', 0, 7).step(1).name("Outer Vortex Detail");
-  gui.add(controls, 'cameraShakeIntensity', 0.0, 1.0).name("Camera Shake Intensity");
-  gui.add(controls, 'Load Scene');
-  gui.addColor(controls, 'primaryColor').name("Primary Color");
-  gui.addColor(controls, 'secondaryColor').name("Secondary Color");
+  gui.add(controls, 'speed', 0.0, 1.0).name("Fireball Speed").onChange(resetTimer);
+  gui.add(controls, 'baseTesselations', 0, 8).step(1).name("Base Fireball Detail").onChange(resetTimer);
+  gui.add(controls, 'showOuterRim', "Show Outer Trail").onChange(resetTimer);
+  gui.add(controls, 'outerRimTesselations', 0, 5).step(1).name("Outer Rim Detail").onChange(resetTimer);
+  gui.add(controls, 'showOuterVortex', "Show Outer Vortex").onChange(resetTimer);
+  gui.add(controls, 'cameraShakeIntensity', 0.0, 1.0).name("Camera Shake Intensity").onChange(resetTimer);
+  gui.addColor(controls, 'primaryColor').name("Primary Color").onChange(resetTimer);
+  gui.addColor(controls, 'secondaryColor').name("Secondary Color").onChange(resetTimer);
+  gui.add(controls, 'Load Scene').onChange(resetTimer);
 }
 
 let fireballBase: Icosphere;
@@ -55,8 +57,10 @@ let square: Square;
 let cube: Cube;
 let prevBaseTesselations: number = 5;
 let prevOuterRimTesselations: number = 4;
-let prevOuterVortexTesselations: number = 4;
 let time = 0;
+let timeSinceUserChangedSpeed = 0;
+let timeSinceSpeedLerpStarted = 0;
+let speedingUp = true;
 
 /* ============= MAIN CODE ============= */
 
@@ -78,7 +82,7 @@ function loadScene() {
   outerRim = new Icosphere(vec3.fromValues(0,0,0), OUTER_RIM_SCALE, controls.outerRimTesselations);
   outerRim.create();
 
-  outerVortex = new Icosphere(vec3.fromValues(0,0,0), OUTER_VORTEX_SCALE, controls.outerVortexTesselations);
+  outerVortex = new Icosphere(vec3.fromValues(0,0,0), OUTER_VORTEX_SCALE, 5);
   outerVortex.create();
 
   square = new Square(vec3.fromValues(0, 0, -5));
@@ -86,6 +90,15 @@ function loadScene() {
   // cube = new Cube(vec3.fromValues(0, 5, 0));
   // cube.create();
   time = 0;
+  timeSinceUserChangedSpeed = 0;
+}
+
+function resetTimer()
+{
+  timeSinceUserChangedSpeed = 0;
+  timeSinceSpeedLerpStarted = 0;
+
+  speedingUp = controls.speed > 0.5? false : true;
 }
 
 function setupShaders(gl: WebGL2RenderingContext)
@@ -138,13 +151,6 @@ function handleInput()
     outerRim = new Icosphere(vec3.fromValues(0,0,0), OUTER_RIM_SCALE, prevOuterRimTesselations);
     outerRim.create();
   }
-
-  if (controls.outerVortexTesselations != prevOuterVortexTesselations)
-  {
-    prevOuterVortexTesselations = controls.outerVortexTesselations;
-    outerVortex = new Icosphere(vec3.fromValues(0,0,0), OUTER_VORTEX_SCALE, prevOuterVortexTesselations);
-    outerVortex.create();
-  }
 }
 
 function getColor(colorArr: number[])
@@ -165,6 +171,40 @@ function getShakePos(camPos: vec3)
   camPos[2] += shake[2];
 
   return {camPos, shake};
+}
+
+// Sourced from www.easings.net
+function easeInOutExpo(x: number): number {
+  return x === 0
+    ? 0
+    : x === 1
+    ? 1
+    : x < 0.5 ? Math.pow(2, 20 * x - 10) / 2
+    : (2 - Math.pow(2, -20 * x + 10)) / 2;
+}
+
+function checkAndLerpSpeed()
+{
+  let timer = speedingUp ? AUTO_SPEEDUP_TIMER : AUTO_SPEEDDOWN_TIMER;
+  let duration = speedingUp ? AUTO_SPEEDUP_DURATION : AUTO_SPEEDDOWN_DURATION;
+
+  if (timeSinceUserChangedSpeed > timer)
+  {
+    if (timeSinceSpeedLerpStarted <= duration)
+    {
+      timeSinceSpeedLerpStarted++;
+      let percentageComplete = timeSinceSpeedLerpStarted / duration;
+      percentageComplete = easeInOutExpo(percentageComplete);
+      controls.speed = speedingUp ? percentageComplete : 1.0 - percentageComplete;
+
+      if (percentageComplete >= 1.0)
+      {
+        speedingUp = !speedingUp;
+        timeSinceSpeedLerpStarted = 0;
+        timeSinceUserChangedSpeed = 0;
+      }
+    }
+  }
 }
 
 function main() {
@@ -235,13 +275,15 @@ function main() {
     fireballShader.setTime(time);
     vortexShader.setTime(time);
     backgroundShader.setTime(time);
+    backgroundShader.setDimensions([window.innerWidth, window.innerHeight]);
+    time++;
+    timeSinceUserChangedSpeed++;
+    checkAndLerpSpeed();
     rimShader.setSpeed(controls.speed);
     fireballShader.setSpeed(controls.speed);
     vortexShader.setSpeed(controls.speed);
     backgroundShader.setSpeed(controls.speed);
-    backgroundShader.setDimensions([window.innerWidth, window.innerHeight]);
-    time++;
-
+    
     // Render background quad
     gl.disable(gl.DEPTH_TEST);
     renderer.render(camera,
