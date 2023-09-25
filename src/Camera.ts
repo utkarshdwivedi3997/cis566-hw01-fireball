@@ -39,10 +39,12 @@ class Camera {
     this.position = position;
   }
 
-  update() {
+  update(shakeNoise: vec3) {
     this.controls.tick();
     vec3.add(this.target, this.position, this.direction);
-    mat4.lookAt(this.viewMatrix, this.controls.eye, this.controls.center, this.controls.up);
+    const actualEye = vec3.create();
+    vec3.subtract(actualEye, this.controls.eye, shakeNoise);
+    mat4.lookAt(this.viewMatrix, actualEye , this.controls.center, this.controls.up);
   }
 };
 

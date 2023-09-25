@@ -28,7 +28,8 @@ const controls = {
   outerVortexTesselations: 4,
   'Load Scene': loadScene, // A function pointer, essentially
   primaryColor: [255,0,0,1],  // default Red color
-  secondaryColor: [255,255,0,1] // default Yellow color
+  secondaryColor: [255,255,0,1], // default Yellow color
+  cameraShakeIntensity: 0.2
 };
 
 function setupGui()
@@ -40,6 +41,7 @@ function setupGui()
   gui.add(controls, 'outerRimTesselations', 0, 5).step(1).name("Outer Rim Detail");
   gui.add(controls, 'showOuterVortex', "Show Outer Vortex");
   gui.add(controls, 'outerVortexTesselations', 0, 7).step(1).name("Outer Vortex Detail");
+  gui.add(controls, 'cameraShakeIntensity', 0.0, 1.0).name("Camera Shake Intensity");
   gui.add(controls, 'Load Scene');
   gui.addColor(controls, 'primaryColor').name("Primary Color");
   gui.addColor(controls, 'secondaryColor').name("Secondary Color");
@@ -150,6 +152,21 @@ function getColor(colorArr: number[])
   return vec4.fromValues(colorArr[0] / 255.0, colorArr[1] / 255.0, colorArr[2] / 255.0, colorArr[3]);
 }
 
+function getShakePos(camPos: vec3)
+{
+  let shake: vec3 = vec3.fromValues(
+    (Math.random() * controls.cameraShakeIntensity * controls.speed * 0.5),
+    (Math.random() * controls.cameraShakeIntensity * controls.speed * 0.5),
+    (Math.random() * controls.cameraShakeIntensity * controls.speed * 0.5)
+  );
+
+  camPos[0] += shake[0];
+  camPos[1] += shake[1];
+  camPos[2] += shake[2];
+
+  return {camPos, shake};
+}
+
 function main() {
   // Initial display for framerate
   const stats = Stats();
@@ -189,10 +206,13 @@ function main() {
   // This function will be called every frame
   function tick() {
     // If the speed has changed, zoom the camera in / out
-    let pos = mix(CAMERA_SLOW_POS, CAMERA_FAST_POS, 1.0 - controls.speed);
-    camera.setPosition(pos);
+    const pos = mix(CAMERA_SLOW_POS, CAMERA_FAST_POS, 1.0 - controls.speed);
+    let {camPos, shake} = getShakePos(pos);
+    // camPos = mix(pos, camPos, controls.speed);
+    camera.setPosition(camPos);
 
-    camera.update();
+    camera.update(shake);
+
     stats.begin();
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
@@ -208,7 +228,7 @@ function main() {
     fireballShader.setColor2(secondaryColor);
     vortexShader.setColor1(primaryColor);
     vortexShader.setColor2(secondaryColor);
-    
+
     rimShader.setTime(time);
     fireballShader.setTime(time);
     vortexShader.setTime(time);
