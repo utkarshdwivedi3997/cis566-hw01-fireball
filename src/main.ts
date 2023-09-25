@@ -228,6 +228,8 @@ function main() {
     fireballShader.setColor2(secondaryColor);
     vortexShader.setColor1(primaryColor);
     vortexShader.setColor2(secondaryColor);
+    backgroundShader.setColor1(primaryColor);
+    backgroundShader.setColor2(secondaryColor);
 
     rimShader.setTime(time);
     fireballShader.setTime(time);
@@ -237,6 +239,7 @@ function main() {
     fireballShader.setSpeed(controls.speed);
     vortexShader.setSpeed(controls.speed);
     backgroundShader.setSpeed(controls.speed);
+    backgroundShader.setDimensions([window.innerWidth, window.innerHeight]);
     time++;
 
     // Render background quad
