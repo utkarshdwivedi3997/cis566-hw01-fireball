@@ -19,7 +19,7 @@ const CAMERA_FAST_POS = vec3.fromValues(0,0,7);
 const AUTO_SPEEDUP_TIMER = 1000.0;
 const AUTO_SPEEDUP_DURATION = 2000.0;
 const AUTO_SPEEDDOWN_TIMER = 1000.0;
-const AUTO_SPEEDDOWN_DURATION = 200.0;
+const AUTO_SPEEDDOWN_DURATION = 100.0;
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
