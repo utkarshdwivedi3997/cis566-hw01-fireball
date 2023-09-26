@@ -24,16 +24,16 @@ First, Fractal Brownian Motion (FBM) noise is sampled at each vertex location to
 
 | <img src="img/img2.png" width = 200> | **+** | <img src="img/img3.png" width = 180> |=| <img src="img/img4.png" width = 200>|
 |:-:|:-:|:-:|:-:|:-:|
-| FBM displaced verts | | Perlin noise displaced verts | | FBM + Perlin displaced verts |
+| FBM displaced verts |+| Perlin noise displaced verts |=| FBM + Perlin displaced verts |
 
 **Adding dynamic motion**
 
 The perlin noise sampling is changed to dynamically move with time, and then added on top of the static FBM noise.
 
 
-| <img src="img/img2.png" width = 200> | **+** | <img src="img/img6.gif" width = 130> |=| <img src="img/img5.gif" width = 130> |
+| <img src="img/img2.png" width = 200> | **+** | <img src="img/img6.gif" width = 200> |=| <img src="img/img5.gif" width = 200> |
 |:-:|:-:|:-:|:-:|:-:|
-| Static FBM displaced verts | | Time perturbed perlin displaced verts | | FBM + dynamic perlin displaced verts |
+| Static FBM displaced verts |+| Time perturbed perlin displaced verts |=| FBM + dynamic perlin displaced verts |
 
 **Moving magma and static rocks**
 
@@ -47,7 +47,7 @@ fs_Pos -= fs_Nor * shouldMove * fs_perlin * 1.0;
 
 This gave me something that looks like a planet with land and dynamic oceans!
 
-| <img src="img/img7.gif" width=200> |
+| <img src="img/img7.gif" width=400> |
 |:-:|
 |FBM + (**NOT** FBM * Time displaced perlin) perturbed verts |
 
