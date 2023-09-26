@@ -1,4 +1,62 @@
-# [Project 1: Noise](https://github.com/CIS-566-Fall-2022/hw01-fireball-base)
+# Procedural Asteroid
+
+## [Live Demo Here](https://utkarshdwivedi3997.github.io/cis566-hw01-fireball/)
+
+This project contains a stylized procedural asteroid created in Typescript and WebGL, using concepts like procedural modeling and texturing using noise functions.
+
+>TODO: Insert GIF of fireball
+
+Just like with any visual project, this asteroid consists of layers upon layers composited together to create the end result. Below is a step by step breakdown of how I achieved this look.
+
+## Breakdown
+
+### 1. Base Asteroid
+
+**Base Shape**
+
+The base shape is a simple icosphere that is deformed using multiple noise functions to make it look uneven and bumpy like an asteroid.
+
+| <img src="img/img1.png" width = 200> |
+|:-:|
+| Simple Icosphere |
+
+First, Fractal Brownian Motion (FBM) noise is sampled at each vertex location to displace that vertex along its normal, based on the FBM amount. A second layer of perlin noise based displacement is also sampled. They are both combined to get a 
+
+| <img src="img/img2.png" width = 200> | **+** | <img src="img/img3.png" width = 180> |=| <img src="img/img4.png" width = 200>|
+|:-:|:-:|:-:|:-:|:-:|
+| FBM displaced verts | | Perlin noise displaced verts | | FBM + Perlin displaced verts |
+
+**Adding dynamic motion**
+
+The perlin noise sampling is changed to dynamically move with time, and then added on top of the static FBM noise.
+
+
+| <img src="img/img2.png" width = 200> | **+** | <img src="img/img6.gif" width = 130> |=| <img src="img/img5.gif" width = 130> |
+|:-:|:-:|:-:|:-:|:-:|
+| Static FBM displaced verts | | Time perturbed perlin displaced verts | | FBM + dynamic perlin displaced verts |
+
+**Moving magma and static rocks**
+
+I wanted to get a look where it seemed like the asteroid had solid rock elements, and only certain parts would move that would be the "magma" on that asteroid. This was done by only displacing those verts using moving perlin noise that had a "low" sample for FBM.
+
+```
+float movingArea = 1.0 - fs_fbm;
+float shouldMove = smoothstep(0.05, 0.15, movingArea);
+fs_Pos -= fs_Nor * shouldMove * fs_perlin * 1.0;
+```
+
+This gave me something that looks like a planet with land and dynamic oceans!
+
+| <img src="img/img7.gif" width=200> |
+|:-:|
+|FBM + (**NOT** FBM * Time displaced perlin) perturbed verts |
+
+
+### 2. Outer Rim
+
+### 3. Vortex
+
+### 4. Background
 
 ## Objective
 
