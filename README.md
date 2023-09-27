@@ -2,6 +2,10 @@
 
 ## [Live Demo Here](https://utkarshdwivedi3997.github.io/cis566-hw01-fireball/)
 
+Please let the live demo sit idle for ~10 seconds to activate the idle animation.
+
+---
+
 This project contains a stylized procedural asteroid created in Typescript and WebGL, using concepts like procedural modeling and stylized texturing using noise functions. It was created as a class project for my Procedural Graphics course at University of Pennsylvania.
 
 ![](img/fullEffect.gif)
@@ -17,7 +21,8 @@ Just like with any visual project, this asteroid consists of layers upon layers 
 3. [Outer Vortex Effect](#3-vortex)
 4. [Background](#4-background)
 5. [Camera Motion & Shake](#5-camera-zoom--shake)
-6. [Future Improvements](#6-future-improvements)
+6. [Customization](#6-customization)
+7. [Future Improvements](#7-future-improvements)
 
 ### 1. Base Asteroid
 
@@ -302,9 +307,16 @@ One of my favourite things to do when I'm working on games is adding **juice**, 
 
 As the speed of the asteroid increases, the camera slowly zooms out. This allows for the enlarging trail from the rim to still be in view, and is also intended to convey increasing speeds, similar to how pretty much every game increases the FOV / zooms out the camera to give illusions of high speed. Similarly, with increasing speeds, the camera starts to shake rapidly.
 
+### 6. Customization
 
+The live demo lets you play around with various parameters to change the look and feel of the demo. [Try it out!](https://utkarshdwivedi3997.github.io/cis566-hw01-fireball/)
 
-### 6. Future improvements
+Here's some of my favourite colour combinations:
+
+| <img src="img/img53.png" width = 200> |<img src="img/img55.png" width = 200>|<img src="img/img56.png" width = 200>|
+|:-:|:-:|:-:|
+
+### 7. Future improvements
 
 I'm very proud of this project and satisfied with the end results. I had more than a dozen eureka moments while working on this, and it was **incredibly** fun seeing the results improve over time.
 
