@@ -12,7 +12,7 @@ Just like with any visual project, this asteroid consists of layers upon layers 
 
 ### 1. Base Asteroid
 
-**Base Shape**
+#### Base Shape
 
 The base shape is a simple icosphere that is deformed using multiple noise functions to make it look uneven and bumpy like an asteroid.
 
@@ -26,7 +26,7 @@ First, Fractal Brownian Motion (FBM) noise is sampled at each vertex location to
 |:-:|:-:|:-:|:-:|:-:|
 | FBM displaced verts |+| Perlin noise displaced verts |=| FBM + Perlin displaced verts |
 
-**Adding dynamic motion**
+#### Adding dynamic motion
 
 The perlin noise sampling is changed to dynamically move with time, and then added on top of the static FBM noise.
 
@@ -35,7 +35,7 @@ The perlin noise sampling is changed to dynamically move with time, and then add
 |:-:|:-:|:-:|:-:|:-:|
 | Static FBM displaced verts |+| Time perturbed perlin displaced verts |=| FBM + dynamic perlin displaced verts |
 
-**Moving magma and static rocks**
+#### Moving magma and static rocks
 
 I wanted to get a look where it seemed like the asteroid had solid, burning hot, rock elements, and only certain parts would move that would be the "magma" on that asteroid. This was done by only displacing those verts using moving perlin noise that had a "low" sample for FBM, which basically means I used the FBM as a *mask* for the perlin noise.
 
@@ -53,9 +53,9 @@ This gave me something that looks like a planet with land and dynamic oceans!
 
 These final updated vertex positions from the vertex shader are passed on to the fragment shader.
 
-**Giving the asteroid its color**
+#### Giving the asteroid its color
 
-**Solid, burning hot, rocks**
+_Solid, burning hot, rocks_
 
 First, low frequency perlin noise is sampled on the displaced 3D vertex positions from the vertex shader, then that noise is used to sample a perturbed FBM on the same vertex positions. Then, high frequency perlin noise is sampled and lerped with the FBM samples to produce a detailed overall rock look.
 
@@ -65,7 +65,7 @@ First, low frequency perlin noise is sampled on the displaced 3D vertex position
 
 In the final shader there is also a *very* subtle bit of motion on the noises based on time so that it doesn't appear completely dull.
 
-**Moving magma**
+_Moving magma_
 
 FBM noise and time are used to perturb perlin noise samples. This is used as a mask to lerp between two magma colours (in this example, red and yellow).
 
@@ -73,15 +73,15 @@ FBM noise and time are used to perturb perlin noise samples. This is used as a m
 |:-:|:-:|:-:|:-:|:-:|
 | Static FBM |&rarr;| FBM + time perturbed perlin |&rarr;| Final magma |
 
-**Combining the rocks and magma**
+_Combining the rocks and magma_
 
-Most of the work for determining *where* the magma and rocks are is already done in the vertex shader, as described above. I just passed that information into the fragment shader and re-used the computed noise to determine the **magma vs rock mask**. This mask is used to combine the magma and rock colours.
+Most of the work for determining *where* the magma and rocks are is already done in the vertex shader, as described [above](#moving-magma-and-static-rocks). I just passed that information into the fragment shader and re-used the computed noise to determine the **magma vs rock mask**. This mask is used to combine the magma and rock colours.
 
 | <img src="img/img14.gif" width = 200> | * (mask) <br> <img src="img/img7.gif" width = 200> | + (1-mask) * <img src="img/img11.png" width = 200> |=| <img src="img/img15.gif" width = 200> |
 |:-:|:-:|:-:|:-:|:-:|
 | Magma | * (mask) | + (rocks * (1-mask)) |=| Overall asteroid colour |
 
-**Final Touches**
+#### Final Touches
 
 Lastly, I added a very subtle rotation to the vertices to add some more dynamic motion to the entire asteroid.
 
