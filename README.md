@@ -17,7 +17,7 @@ Just like with any visual project, this asteroid consists of layers upon layers 
 3. [Outer Vortex Effect](#3-vortex)
 4. [Background](#4-background)
 5. [Camera Motion & Shake](#5-camera-motion--shake)
-6. [Future Improvements](#6-future-improvement)
+6. [Future Improvements](#6-future-improvements)
 
 ### 1. Base Asteroid
 
@@ -239,10 +239,69 @@ This is a simple gradient applied based on an eased gradient in the Y-axis. A fi
 
 ### 4. Background
 
+I wanted the asteroid to be in "space" among stars, and as the asteroid picks up speed, I wanted to add a "warp" effect (something like warp-speed effects from space movies and games).
+
+The background is rendered on to a screen-spanning quadrangle. This adds a limitation of only being able to play around with 2 axes which come from the UVs.
+
+#### Making the stars
+
+This was simple: sample worley noise, have the center of each cell be a star. An exponential falloff from the center of the cell is used to mimic light falloff.
+
+| <img src="img/img37.png" width = 200> |<img src="img/img40.png" width = 200>|
+|:-:|:-:|
+| Worley sample |Stars |
+
+This doesn't look super appealing. Eventually when the stars started moving I wanted to fake 3D, with some sort of parallaxing. To do this, I performed "fake" raymarching. I sampled worley at different grid sizes, 3 times. Changing the grid size effectively faked *depth*: each iteration is a farther depth in this raymarching algorithm. Then, based on the iteration of the sample, the stars are scaled down, to fake perspective. The final result is the composition of all 3 star layers.
+
+| <img src="img/img37.png" width = 200> |<img src="img/img39.png" width = 200>|<img src="img/img38.png" width = 200>|
+|:-:|:-:|:-:|
+| Worley sample 1x |Worley sample 2x |Worley sample 3x |
+
+When the composited stars are put in motion, the fake 3D result looks quite convincing!
+
+| <img src="img/img41.gif" width = 200> |<img src="img/img42.gif" width = 200>|<img src="img/img43.gif" width = 200>|
+|:-:|:-:|:-:|
+| Stars (1 depth iteration) |Stars (2 depth iterations) |Stars (3 depth iterations) |
+
+#### Non-uniform stars
+
+I wanted to make the appearance of stars a little bit uneven, as in the above results they seem to be everywhere. To do this, I followed the same fake raymarching technique as above and sampled FBM at 3 different frequencies, then composited it to make a mask. The mask is multiplied with the stars to mask out some random areas. There is the added benefit of brighter glow from the stars!
+
+|<img src="img/img43.gif" width = 200>|*(1-mask)|<img src="img/img44.gif" width = 200> |=|<img src="img/img45.gif" width = 200>|
+|:-:|:-:|:-:|:-:|:-:|
+| Stars (3x iterations) |*|FMB (3x iterations) |=|Uneven, brighter stars|
+
+#### Colouring the stars
+
+Same as all other shaders above, the stars are coloured based on an eased gradient between two colours. The only difference here, is that the colours used for the stars are mathematical RGB complements of the two colours used in rendering the asteroid, and its rim and vortex. These are **not** the complements that are on the opposite side of the colour wheel, but that's ok: the results look good!
+
+```
+vec3 primary_star_color = vec3(1.0) - primary_color
+vec3 secondary_star_color = vec3(1.0) - secondary_color
+```
+
+|<img src="img/img47.png" width = 200>|<img src="img/img46.png" width = 200>|
+|:-:|:-:|
+|Asteroid, outer rim, vortex| Stars (complements of asteroid colors) |
+
+#### Warp Speed Motion Lines
+
+The scale of the grids used to sample worley noise for the stars is stretched in the Y-axis as the speed of the asteroid increases. This has the effect of "stretching" the sampled worley noise. Exactly what I needed!
+
+|<img src="img/img49.png" width = 200>|<img src="img/img50.png" width = 200>|<img src="img/img51.png" width = 200>|<img src="img/img52.png" width = 200>|
+|:-:|:-:|:-:|:-:|
+| Speed 0.1x |Speed 0.25x|Speed 0.7x |Speed 1x|
+
+|<img src="img/img53.gif" width = 300>|
+|:-:|
+| Stars moving with increasing speed |
+
 ### 5. Camera Motion & Shake!
 
-### 6. Future improvement
+### 6. Future improvements
 
-I'm super proud of this project, and I'd love to revisit it to implement techniques such as [dithered transparency](https://www.youtube.com/watch?v=vje0x1BNpp8&t=110s) and have some effects be affected by music!
+I'm very proud of this project and satisfied with the end results. I had more than a dozen eureka moments while working on this, and it was **incredibly** fun seeing the results improve over time.
+
+I'd love to revisit it to implement techniques such as [dithered transparency](https://www.youtube.com/watch?v=vje0x1BNpp8&t=110s) for the flames, and have some effects be affected by music!
 
 Thanks for reading!
