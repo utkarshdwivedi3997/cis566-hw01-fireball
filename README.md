@@ -59,9 +59,9 @@ These final updated vertex positions from the vertex shader are passed on to the
 
 First, low frequency perlin noise is sampled on the displaced 3D vertex positions from the vertex shader, then that noise is used to sample a perturbed FBM on the same vertex positions. Then, high frequency perlin noise is sampled and lerped with the FBM samples to produce a detailed overall rock look.
 
-| <img src="img/img8.png" width = 200> |&rarr;| <img src="img/img9.png" width = 200> |+| <img src="img/img10.png" width = 200> |=|<img src="img/img11.png" width = 200> |
+| <img src="img/img8.png" width = 200> |&rarr;| <img src="img/img9.png" width = 200> |**mix with**| <img src="img/img10.png" width = 200> |=|<img src="img/img11.png" width = 200> |
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| Low frequency perlin |&rarr;| Perlin perturbed FBM |+| FBM + dynamic perlin displaced verts |=|Final rocks|
+| Low frequency perlin |&rarr;| Perlin perturbed FBM |mix with | Very high frequency perlin|=|Final rocks|
 
 In the final shader there is also a *very* subtle bit of motion on the noises based on time so that it doesn't appear completely dull.
 
