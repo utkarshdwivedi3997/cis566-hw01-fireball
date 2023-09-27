@@ -4,7 +4,7 @@
 
 This project contains a stylized procedural asteroid created in Typescript and WebGL, using concepts like procedural modeling and stylized texturing using noise functions. It was created as a class project for my Procedural Graphics course at University of Pennsylvania.
 
->TODO: Insert GIF of fireball
+![](img/fullEffect.gif)
 
 ## Breakdown
 
@@ -16,7 +16,7 @@ Just like with any visual project, this asteroid consists of layers upon layers 
 2. [Outer Rim Effect](#2-outer-rim)
 3. [Outer Vortex Effect](#3-vortex)
 4. [Background](#4-background)
-5. [Camera Motion & Shake](#5-camera-motion--shake)
+5. [Camera Motion & Shake](#5-camera-zoom--shake)
 6. [Future Improvements](#6-future-improvements)
 
 ### 1. Base Asteroid
@@ -296,7 +296,13 @@ The scale of the grids used to sample worley noise for the stars is stretched in
 |:-:|
 | Stars moving with increasing speed |
 
-### 5. Camera Motion & Shake!
+### 5. Camera Zoom & Shake!
+
+One of my favourite things to do when I'm working on games is adding **juice**, and what better way to do that in a shader about movement than camera zoom and shake!
+
+As the speed of the asteroid increases, the camera slowly zooms out. This allows for the enlarging trail from the rim to still be in view, and is also intended to convey increasing speeds, similar to how pretty much every game increases the FOV / zooms out the camera to give illusions of high speed. Similarly, with increasing speeds, the camera starts to shake rapidly.
+
+
 
 ### 6. Future improvements
 
