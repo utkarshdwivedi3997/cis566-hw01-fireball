@@ -144,9 +144,6 @@ void main()
     alpha = mix(alpha, 1.0, fadeAmount);
     alpha = smoothstep(0.3, 0.35, alpha);
 
-    vec3 red = vec3(1.0,0.0,0.0);
-    vec3 yellow = vec3(1.0, 1.0, 0.0);
-
     if (alpha <= 0.0)
     {
         discard;

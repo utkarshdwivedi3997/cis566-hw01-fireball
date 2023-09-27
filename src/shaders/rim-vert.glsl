@@ -148,9 +148,11 @@ void main()
     float dist = distance(vec3(fs_Pos), vec3(0.0,0.0,0.0));
 
 
+    // Only stretch above the equator
     float stretchArea = smoothstep(0.5, 0.6, (fs_Pos.y + 1.0) * 0.5) * u_Speed;
 
     // Stretch the glow in the Y direction
+    // Squash it in the XZ plane
     vec3 teardropScale = vec3(1.0 + stretchArea * 0.001 / dist,
                               1.0 + stretchArea * 3.0 / dist,
                               1.0 + stretchArea * 0.001 / dist);
