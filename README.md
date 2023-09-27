@@ -236,7 +236,7 @@ I'd been using too much FBM and perlin noise and decided to switch things up a b
 
 #### Colouring the vortex
 
-This is a simple gradient applied based on an eased gradient in the Y-axis. A finaly rotation is applied on the vortex based on the speed.
+This is a simple gradient applied based on an eased gradient in the Y-axis. A final rotation is applied on the vortex based on the speed.
 
 | <img src="img/img35.gif" width = 200> |<img src="img/img36.gif" width = 200>|<img src="img/img37.gif" width = 200>|
 |:-:|:-:|:-:|
