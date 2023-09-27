@@ -129,9 +129,13 @@ The glow is fully opaque at the bottom, but starts disappearing in perturbed chu
 
 First, a static FBM is sampled, and then used to perturb another FBM that is also affected by time and speed. A mask is created based on the Y-position of the vertices, also affected by speed. This mask is applied on to the second FBM. Finally, a `smoothstep` operation is used to saturate out the greys into blacks and whites. The end result is an alpha mask that is fully opaque at the bottom, but has a burning fire effect at the top.
 
-| <img src="img/img20.gif" width = 200> |&rarr;|  <img src="img/img21.gif" width = 200>|*|  <img src="img/img22.gif" width = 200>|**saturate**|<img src="img/img23.gif" width = 200>|
-|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| Static FBM 1 |&rarr;|+ Time, FBM 1 & Speed perturbed FBM 2 |*|Y-pos + speed mask|saturate|Final flames alpha mask|
+| <img src="img/img20.gif" width = 200> |&rarr;|  <img src="img/img21.gif" width = 200>|*|  <img src="img/img22.gif" width = 200>|**saturate**|
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| Static FBM 1 |&rarr;|+ Time, FBM 1 & Speed perturbed FBM 2 |*|Y-pos + speed mask|saturate|
+
+|<img src="img/img23.gif" width = 200>|
+|:-:|
+|Final flames alpha mask|
 
 **Colouring the fire**
 
@@ -172,7 +176,9 @@ I implemented this for the outer rim effect, which is rendered with only front f
 
 As I was about done with the rim, I turned off the blending and instead simply `discard`ed pixels with alpha<0 in the fragment shader. This was just to see if the result would be any different, and it ended up looking like a dissolve shader, completely on accident. The white edges around the flames are due to the fact that the alpha mask is a grayscale gradient, not black-and-white, but the colour gradient is slightly offset. As such, any areas not coloured, but with alpha>0 are still rendered, simply in white. I liked this effect, so I kept it this way. An added bonus is that the `discard` method is slightly cheaper than enabling alpha blending!
 
-
+| <img src="img/img30.gif" width = 300> |
+|:-:|
+| Final outer rim around base asteroid |
 
 ### 3. Vortex
 
