@@ -229,12 +229,20 @@ I'd been using too much FBM and perlin noise and decided to switch things up a b
     </tr>
 </table>
 
+#### Colouring the vortex
+
+This is a simple gradient applied based on an eased gradient in the Y-axis. A finaly rotation is applied on the vortex based on the speed.
+
+| <img src="img/img35.gif" width = 200> |<img src="img/img36.gif" width = 200>|<img src="img/img37.gif" width = 200>|
+|:-:|:-:|:-:|
+| Colour gradient |Vortex at 0.5x speed|Vortex at max speed|
+
 ### 4. Background
 
 ### 5. Camera Motion & Shake!
 
 ### 6. Future improvement
 
-I'm super proud of this project, and I'd love to revisit it to implement techniques such as dithered transparency and have some effects be affected by music!
+I'm super proud of this project, and I'd love to revisit it to implement techniques such as [dithered transparency](https://www.youtube.com/watch?v=vje0x1BNpp8&t=110s) and have some effects be affected by music!
 
 Thanks for reading!
