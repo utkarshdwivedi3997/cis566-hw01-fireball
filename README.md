@@ -91,7 +91,91 @@ Lastly, I added a very subtle rotation to the vertices to add some more dynamic 
 
 ### 2. Outer Rim
 
+The reason for including an outer rim / glow effect is that I wanted to be able to move the asteroid at different speeds. With that in mind, I imagined that when the asteroid is stationary, there would be no rim around it. As the asteroid started picking up speed, a glow would start forming around it, which would start elongating against the direction of motion of the asteroid. The side of the glow pointing away from the direction of motion would be tapered around the edges.
+
+#### Base rim shape
+
+This is a duplicate icosphere, slightly scaled up (1.1x) compared to the base fireball icosphere. The vertex shader takes in a `u_Speed` parameter in the range `[0,1]` and based on the speed, changes the shape of the sphere to an ellipsoid, or a "teardrop" shape. This is done by first using `smoothstep` to mask out scaling of the bottom half of the sphere, and then scaling the upper half based on each vertex's distance from the center of the sphere and the speed of movement. 
+
+```
+// Distance from the center of the sphere, in this case the origin
+float dist = distance(vec3(fs_Pos), vec3(0.0));
+
+// Only stretch above the equator
+float stretchArea = smoothstep(0.5, 0.6, (fs_Pos.y + 1.0) * 0.5) * u_Speed;
+
+// Stretch the glow in the Y direction
+// Squash it in the XZ plane
+vec3 teardropScale = vec3(1.0 + stretchArea * 0.001 / dist,
+                            1.0 + stretchArea * 3.0 / dist,
+                            1.0 + stretchArea * 0.001 / dist);
+```
+
+| <img src="img/img17.gif" width = 500> |
+|:-:|
+| Teardrop based on speed |
+
+Then, using the same techniques described in the base asteroid's section, I added noise and time based displacement to the shape. The amount is also affected by the speed.
+
+| <img src="img/img18.gif" width = 200> |  <img src="img/img19.gif" width = 200>|
+|:-:|:-:|
+| Low frequency perlin displacement | + High frequency FBM displacement |
+
+#### Fire effect
+
+The glow is fully opaque at the bottom, but starts disappearing in perturbed chunks away from the direction of motion as the asteroid starts gaining speed.
+
+**Generating the alpha mask**
+
+First, a static FBM is sampled, and then used to perturb another FBM that is also affected by time and speed. A mask is created based on the Y-position of the vertices, also affected by speed. This mask is applied on to the second FBM. Finally, a `smoothstep` operation is used to saturate out the greys into blacks and whites. The end result is an alpha mask that is fully opaque at the bottom, but has a burning fire effect at the top.
+
+| <img src="img/img20.gif" width = 200> |&rarr;|  <img src="img/img21.gif" width = 200>|*|  <img src="img/img22.gif" width = 200>|**saturate**|<img src="img/img23.gif" width = 200>|
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| Static FBM 1 |&rarr;|+ Time, FBM 1 & Speed perturbed FBM 2 |*|Y-pos + speed mask|saturate|Final flames alpha mask|
+
+**Colouring the fire**
+
+The flame mask from above is modified to form a gradient mask, masking out areas at the top and the bottom. This grayscale gradient mask is then used to colour the fire, where the colour gradient lerps from one colour to another.
+
+| <img src="img/img24.gif" width = 200> |+|  <img src="img/img25.gif" width = 200>|=|  <img src="img/img26.gif" width = 200>|
+|:-:|:-:|:-:|:-:|:-:|
+| Grayscale gradient mask |+| Color gradient |=|Y-pos + speed mask|
+
+**Transparency**
+
+Just enabling transparency gives undesired effects. The blending is broken, and the outer rim has no backface culling, which ends up displaying its back faces too!
+
+| <img src="img/img27.gif" width = 200> |  <img src="img/img28.png" width = 200>|
+|:-:|:-:|
+| Broken alpha blending | No backface culling |
+
+As I was working on fixing this, I realized that a fixed version would still render the flames of the outer rim OVER the base asteroid, which is not ideal!
+
+**Inverted-hull**
+
+Enter [inverted hull](https://www.youtube.com/watch?v=vje0x1BNpp8&t=5s): a rather cheap stylized outlining technique I learned while working on my game, [Fling to the Finish](https://store.steampowered.com/app/1054430/Fling_to_the_Finish/). It works like this:
+
+```
+1. Enable front face culling.
+2. Render a scaled up version of the object. This is the outline.
+3. Disable front face culling.
+4. Render the main object.
+```
+
+I implemented this for the outer rim effect, which is rendered with only front faces culled. Then the main asteroid is rendered, with its back faces culled. This works because while we're seeing the *front* faces of the main asteroid, it is slightly smaller than the outer rim and shows the portion of the rim behind the asteroid. Since we're now only seeing the *back* faces of the outer rim, it no longer hides the asteroid, even though the actual mesh entirely covers the asteroid!
+
+| <img src="img/img29.gif" width = 300> |
+|:-:|
+| Inverted Hull |
+
+**Unintentional Dissolve Effect**
+
+As I was about done with the rim, I turned off the blending and instead simply `discard`ed pixels with alpha<0 in the fragment shader. This was just to see if the result would be any different, and it ended up looking like a dissolve shader, completely on accident. The white edges around the flames are due to the fact that the alpha mask is a grayscale gradient, not black-and-white, but the colour gradient is slightly offset. As such, any areas not coloured, but with alpha>0 are still rendered, simply in white. I liked this effect, so I kept it this way. An added bonus is that the `discard` method is slightly cheaper than enabling alpha blending!
+
+
+
 ### 3. Vortex
+
 
 ### 4. Background
 
