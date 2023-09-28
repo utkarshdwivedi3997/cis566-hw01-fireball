@@ -34,7 +34,7 @@ The base shape is a simple icosphere that is deformed using multiple noise funct
 |:-:|
 | Simple Icosphere |
 
-First, Fractal Brownian Motion (FBM) noise is sampled at each vertex location to displace that vertex along its normal, based on the FBM amount. A second layer of perlin noise based displacement is also sampled. They are both combined to get a 
+First, Fractal Brownian Motion (FBM) noise is sampled at each vertex location to displace that vertex along its normal, based on the FBM amount. A second layer of perlin noise based displacement is also sampled. They are both combined to get more detailed displacements.
 
 | <img src="img/img2.png" width = 200> | **+** | <img src="img/img3.png" width = 180> |=| <img src="img/img4.png" width = 200>|
 |:-:|:-:|:-:|:-:|:-:|
