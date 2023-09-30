@@ -8,7 +8,7 @@ Please let the live demo sit idle for ~10 seconds to activate the idle animation
 
 This project contains a stylized procedural asteroid created in Typescript and WebGL, using concepts like procedural modeling and stylized texturing using noise functions. It was created as a class project for my Procedural Graphics course at University of Pennsylvania.
 
-<img src="img/fullEffect.gif" width=600>
+<img src="img/fullEffect.gif" width=450>
 
 ## Breakdown
 
